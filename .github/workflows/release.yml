@@ -1,0 +1,123 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Yayın etiketi (örn. v0.1.0)"
+        required: true
+        default: "v0.1.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Kaynağı çek
+        uses: actions/checkout@v4
+
+      - name: .NET 8 SDK kur
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: NuGet önbelleği
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('**/*.csproj') }}
+
+      - name: Bağımlılıkları getir
+        run: dotnet restore KameraIzleme.sln
+
+      - name: Derle (Release)
+        run: dotnet build KameraIzleme.sln -c Release --no-restore
+
+      - name: Birim testler
+        run: dotnet test tests/KameraIzleme.Tests/KameraIzleme.Tests.csproj -c Release --no-build --logger "trx;LogFileName=test-sonuc.trx" --results-directory TestSonuclari
+        continue-on-error: true
+
+      - name: Test sonuçlarını yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-sonuclari
+          path: TestSonuclari
+
+      - name: Yayınla — self-contained tek dosya (win-x64)
+        run: >
+          dotnet publish src/KameraIzleme/KameraIzleme.csproj
+          -c Release
+          -r win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+          -p:DebugType=None
+          -p:DebugSymbols=false
+          -o publish/win-x64-selfcontained
+
+      - name: Yayınla — framework-dependent (win-x64)
+        run: >
+          dotnet publish src/KameraIzleme/KameraIzleme.csproj
+          -c Release
+          -r win-x64
+          --self-contained false
+          -p:DebugType=None
+          -p:DebugSymbols=false
+          -o publish/win-x64-frameworkdep
+
+      - name: Etiket sürümünü belirle
+        id: sur
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "push") {
+            $tag = "${{ github.ref_name }}"
+          } else {
+            $tag = "${{ github.event.inputs.version }}"
+          }
+          "tag=$tag" | Out-File -Append $env:GITHUB_OUTPUT
+          "surum=$($tag.TrimStart('v'))" | Out-File -Append $env:GITHUB_OUTPUT
+
+      - name: Zip paketlerini hazırla
+        shell: pwsh
+        run: |
+          $sur = "${{ steps.sur.outputs.surum }}"
+          $sc  = "KameraIzleme-$sur-win-x64-selfcontained.zip"
+          $fd  = "KameraIzleme-$sur-win-x64-frameworkdep.zip"
+          Compress-Archive -Path publish/win-x64-selfcontained/* -DestinationPath $sc -Force
+          Compress-Archive -Path publish/win-x64-frameworkdep/*  -DestinationPath $fd -Force
+          "self=$sc" | Out-File -Append $env:GITHUB_OUTPUT
+          "fw=$fd"   | Out-File -Append $env:GITHUB_OUTPUT
+        id: paket
+
+      - name: Yayın (release) oluştur ve zip ekle
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.sur.outputs.tag }}
+          name: Kamera İzleme ${{ steps.sur.outputs.tag }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            .NET 8 WinForms — Windows x64.
+
+            İki paket seçeneği:
+
+            - **selfcontained**: .NET runtime dahil, tek exe. .NET kurulu olmasa da çalışır. ~70 MB civarı.
+            - **frameworkdep**: küçük paket, ama makinede .NET 8 Desktop Runtime kurulu olmalı.
+
+            İlk açılışta:
+
+            1. Zip'i istediğin klasöre çıkart.
+            2. `KameraIzleme.exe`'yi çalıştır — yanına `kamera.db` ve `logs/` klasörü oluşur.
+            3. **Ayarlar** sekmesinden SMTP ve izleme parametrelerini yap.
+            4. Denemek için "Deneme modu"nu işaretle → yeniden başlat.
+          files: |
+            ${{ steps.paket.outputs.self }}
+            ${{ steps.paket.outputs.fw }}
