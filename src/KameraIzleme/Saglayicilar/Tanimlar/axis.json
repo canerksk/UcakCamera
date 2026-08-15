@@ -1,0 +1,36 @@
+{
+  "marka": "Axis",
+  "oncelik": 100,
+  "parmakizi": {
+    "onvif_uretici_icerir": ["axis"],
+    "http_server_basligi_icerir": ["AXIS", "Axis-"],
+    "http_yol_kontrolu": [
+      { "yol": "/axis-cgi/param.cgi?action=list&group=Brand", "beklenen_durum": 200 }
+    ]
+  },
+  "kimlik_dogrulama": "digest",
+  "rtsp": {
+    "ana_akis": "/axis-media/media.amp?videocodec=h264",
+    "alt_akis": "/axis-media/media.amp?videocodec=h264&resolution=640x480"
+  },
+  "durum_kontrolu": {
+    "yol": "/axis-cgi/systemready.cgi?schemaversion=1",
+    "format": "json",
+    "basari_kosulu": "data.systemready"
+  },
+  "kanal_listesi": null,
+  "olay_akisi": {
+    "yol": "/axis-cgi/eventstream.cgi",
+    "tip": "multipart",
+    "format": "xml",
+    "olay_yolu": "//tt:Message",
+    "alan_eslemesi": {
+      "olay_tipi": "@Topic",
+      "kanal_no": "@ChannelToken"
+    },
+    "olay_eslemesi": {
+      "tns1:videosource/motionalarm": "sinyal_kaybi",
+      "tns1:device/trigger/tampering": "yetkisiz_erisim"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "marka": "Uniview",
+  "oncelik": 100,
+  "parmakizi": {
+    "onvif_uretici_icerir": ["uniview", "unv"],
+    "http_server_basligi_icerir": ["uc-httpd", "Web Server"],
+    "http_yol_kontrolu": [
+      { "yol": "/LAPI/V1.0/System/DeviceInfo", "beklenen_durum": 200 }
+    ]
+  },
+  "kimlik_dogrulama": "digest",
+  "rtsp": {
+    "ana_akis": "/media/video{kanal}",
+    "alt_akis": "/media/video{kanal}sub"
+  },
+  "durum_kontrolu": {
+    "yol": "/LAPI/V1.0/System/DeviceInfo",
+    "format": "json",
+    "basari_kosulu": "Response.Data.DeviceModel"
+  },
+  "kanal_listesi": {
+    "yol": "/LAPI/V1.0/Channels",
+    "format": "json",
+    "liste_yolu": "Response.Data.ChannelList",
+    "alan_eslemesi": {
+      "kanal_no": "ID",
+      "ad": "Name",
+      "ip": "IPAddress",
+      "cevrimici": "Online"
+    }
+  },
+  "olay_akisi": null
+}

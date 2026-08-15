@@ -1,0 +1,47 @@
+{
+  "marka": "Hikvision",
+  "oncelik": 100,
+  "parmakizi": {
+    "onvif_uretici_icerir": ["hikvision", "hiwatch"],
+    "http_server_basligi_icerir": ["App-webs", "DVRDVS-Webs", "webs"],
+    "http_yol_kontrolu": [
+      { "yol": "/doc/page/login.asp", "beklenen_durum": 200 }
+    ]
+  },
+  "kimlik_dogrulama": "digest",
+  "rtsp": {
+    "ana_akis": "/Streaming/Channels/{kanal}01",
+    "alt_akis": "/Streaming/Channels/{kanal}02"
+  },
+  "durum_kontrolu": {
+    "yol": "/ISAPI/System/status",
+    "format": "xml",
+    "basari_kosulu": "//DeviceStatus"
+  },
+  "kanal_listesi": {
+    "yol": "/ISAPI/ContentMgmt/InputProxy/channels",
+    "format": "xml",
+    "liste_yolu": "//InputProxyChannel",
+    "alan_eslemesi": {
+      "kanal_no": "id",
+      "ad": "name",
+      "ip": "sourceInputPortDescriptor/ipAddress",
+      "cevrimici": "online"
+    }
+  },
+  "olay_akisi": {
+    "yol": "/ISAPI/Event/notification/alertStream",
+    "tip": "multipart",
+    "format": "xml",
+    "olay_yolu": "//EventNotificationAlert",
+    "alan_eslemesi": {
+      "olay_tipi": "eventType",
+      "kanal_no": "channelID"
+    },
+    "olay_eslemesi": {
+      "videoloss": "sinyal_kaybi",
+      "nodiskerror": "disk_hatasi",
+      "illaccess": "yetkisiz_erisim"
+    }
+  }
+}
