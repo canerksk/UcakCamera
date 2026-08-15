@@ -1,0 +1,40 @@
+# .NET
+bin/
+obj/
+out/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+.vs/
+.vscode/
+
+# NuGet
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+packages/
+
+# Publish
+publish/
+*.publishsettings
+PublishScripts/
+
+# Logs
+logs/
+*.log
+
+# Uygulama verisi
+kamera.db
+kamera.db-journal
+kamera.db-wal
+kamera.db-shm
+
+# Rider / VS
+.idea/
+*.DotSettings.user
+
+# OS
+.DS_Store
+Thumbs.db

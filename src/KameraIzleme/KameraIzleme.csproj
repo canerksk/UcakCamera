@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWindowsForms>true</UseWindowsForms>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>KameraIzleme</RootNamespace>
+    <AssemblyName>KameraIzleme</AssemblyName>
+    <ApplicationIcon />
+    <StartupObject>KameraIzleme.Program</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="MailKit" Version="4.7.1.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.8" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="ScottPlot.WinForms" Version="5.0.40" />
+    <PackageReference Include="Serilog" Version="4.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Saglayicilar\Tanimlar\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
