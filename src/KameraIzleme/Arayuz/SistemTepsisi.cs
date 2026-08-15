@@ -14,7 +14,7 @@ public sealed class SistemTepsisi : IDisposable
 
     public bool CikisIstenmiyor { get; private set; } = true;
 
-    public event EventHandler<string>? KameraDusuncePatlat;
+    private readonly Dictionary<long, bool> _oncekiCevrimici = new();
 
     public SistemTepsisi(Form pencere)
     {
@@ -35,8 +35,29 @@ public sealed class SistemTepsisi : IDisposable
         _ikon.DoubleClick += (_, _) => Goster();
     }
 
-    public void TepsiDurumunuTazele(IReadOnlyList<(Kamera, KameraDurumu)> guncellenenler)
+    public void TepsiDurumunuTazele(IReadOnlyList<(Kamera Kamera, KameraDurumu Durum)> guncellenenler)
     {
+        // Yeni düşen kameralar için balon bildir
+        var yeniDusenler = new List<Kamera>();
+        foreach (var (k, d) in guncellenenler)
+        {
+            if (_oncekiCevrimici.TryGetValue(k.Id, out bool onceki) && onceki && !d.Cevrimici)
+            {
+                yeniDusenler.Add(k);
+            }
+
+            _oncekiCevrimici[k.Id] = d.Cevrimici;
+        }
+
+        if (yeniDusenler.Count == 1)
+        {
+            BalonGoster("Kamera düştü", $"{yeniDusenler[0].Ad} ({yeniDusenler[0].Ip})", ToolTipIcon.Warning);
+        }
+        else if (yeniDusenler.Count > 1)
+        {
+            BalonGoster("Toplu kesinti", $"{yeniDusenler.Count} kamera düştü — ayrıntı için Olaylar sekmesine bakın.", ToolTipIcon.Warning);
+        }
+
         bool hepsiCevrimici = guncellenenler.All(g => g.Item2.Cevrimici);
         bool bazisiDustu = guncellenenler.Any(g => !g.Item2.Cevrimici);
         Color renk = hepsiCevrimici ? Color.SeaGreen : (bazisiDustu ? Color.IndianRed : Color.Goldenrod);

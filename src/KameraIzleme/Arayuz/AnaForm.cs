@@ -32,7 +32,6 @@ public partial class AnaForm : Form
         sekmeAyarlar.Controls.Add(_ayarlarPanel);
 
         _tepsi = new SistemTepsisi(this);
-        _tepsi.KameraDusuncePatlat += (_, mesaj) => _tepsi.BalonGoster("Kamera düştü", mesaj, ToolTipIcon.Warning);
 
         // Deneme modu (varsa) sunucularını başlat
         _kapsam.DenemeSunucularaBasla();
